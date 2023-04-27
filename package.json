@@ -5,16 +5,21 @@
   "main": "index.js",
   "scripts": {
     "start-server": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.21.0",
+    "assert": "^2.0.0",
+    "chai": "^4.3.7",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "mqtt": "^4.3.7"
+    "mocha": "^10.2.0",
+    "mqtt": "^4.3.7",
+    "path": "^0.12.7",
+    "supertest": "^6.3.3"
   }
 }
