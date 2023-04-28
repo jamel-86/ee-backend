@@ -107,14 +107,11 @@ router.patch('/:userId', async (req, res) => {
 router.post('/signin', async (req, res) => {
   console.log('signing in user');
   const { email, password } = req.body;
-  const { user, session, error } = await supabase.auth.signIn({
-    email,
-    password,
-  });
 
-  if (error) {
-    console.log('error signing in user:', error);
-    return res.status(400).json({ error: error.message });
+  const { success, message, user, session } = await signIn(email, password);
+
+  if (!success) {
+    return res.status(400).json({ error: message });
   }
 
   console.log('user signed in:', user);

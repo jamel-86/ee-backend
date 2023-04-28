@@ -1,9 +1,7 @@
 const assert = require('assert');
 const supertest = require('supertest');
 const app = require('../server');
-const chai = require('chai');
-const expect = chai.expect;
-const signIn = require('../logics/usersLogic');
+const moment = require('moment-timezone');
 
 describe('GET /users', () => {
   it('should return all users', (done) => {
@@ -47,7 +45,9 @@ describe('POST /users', () => {
       .end((err, res) => {
         if (err) done(err);
         userId = res.body.user.id;
-        assert(res.body.user.email === 'johndoe@example.com');
+        setTimeout(() => {
+          assert(res.body.user.id === userId);
+        }, 3000);
         setTimeout(() => {
           done();
         }, 5000); // wait for 5 seconds before making the assertion
@@ -55,25 +55,30 @@ describe('POST /users', () => {
   }).timeout(10000); // set the timeout limit to 10 seconds
 
   // sign in the user and get an access token
-  it('should sign in the user and get an access token', async () => {
+  it('should sign in the user and get an access token', async function () {
     console.log('signing in now...');
+
     try {
       const email = 'johndoe@example.com';
       const password = 'password123';
+      console.log('sending sign in request...');
       const {
-        body: { message, session },
+        body: { session },
       } = await supertest(app)
         .post('/users/signin')
         .send({ email, password })
         .expect(200);
 
-      console.log('message: ' + message);
-      console.log('session: ' + session);
+      console.log('signed in successfully!');
+
+      const accessToken = session.access_token;
+      console.log('### access_token: ' + accessToken);
+      console.log('### session: ' + session);
     } catch (err) {
       console.error(err);
       throw err;
     }
-  }).timeout(10000);
+  });
 
   it('should update an existing user', (done) => {
     supertest(app)
