@@ -93,23 +93,34 @@ async function signOut() {
   return { success: true, message: 'User signed out successfully' };
 }
 
-async function updateUser(userId, newData) {
-  const { data: updatedUser, error } = await supabase.auth.updateUser(
-    userId,
-    newData
-  );
+const updateUser = async (req, res) => {
+  const { userId } = req.params;
+  const { email } = req.body;
+  const { user } = req;
 
-  if (error) {
-    console.error(error);
-    return { success: false, message: 'Failed to update user' };
+  try {
+    const { data, error } = await supabase.auth.api.updateUser(
+      user.access_token, // Pass the access_token here
+      { email }
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    res.status(200).json({
+      status: 'success',
+      user: data,
+    });
+  } catch (error) {
+    console.error('Failed to update user', error);
+    res.status(400).json({
+      status: 'error',
+      message: 'Failed to update user',
+      details: error,
+    });
   }
-
-  return {
-    success: true,
-    message: 'User updated successfully',
-    user: updatedUser,
-  };
-}
+};
 
 module.exports = {
   createNewUser,
