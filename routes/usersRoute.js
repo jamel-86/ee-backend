@@ -87,6 +87,7 @@ router.patch('/:userId/metadata', async (req, res) => {
   return res.status(200).json({ user: result.user });
 });
 
+// usersRoute.js
 // Update user
 router.patch('/:userId', async (req, res) => {
   const {
@@ -103,6 +104,8 @@ router.patch('/:userId', async (req, res) => {
   return res.status(200).json({ user: result.user });
 });
 
+
+// userRoute.js
 // Sign in user
 router.post('/signin', async (req, res) => {
   console.log('signing in user');

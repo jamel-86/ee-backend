@@ -57,6 +57,7 @@ const deleteUser = async (userId) => {
   return { message: 'User deleted successfully', user: user };
 };
 
+// usersLogic.js
 // create an signIn function
 async function signIn(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({

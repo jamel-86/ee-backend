@@ -31,31 +31,27 @@ describe('GET /users/:userId', () => {
   });
 });
 
-describe('POST /users', () => {
+describe('User tests', () => {
   let userId;
+  let accessToken;
 
-  it('should create a new user', (done) => {
-    supertest(app)
+  before('Create a new user', async function () {
+    const email = 'johndoe@example.com';
+    const password = 'password123';
+    const {
+      body: { user },
+    } = await supertest(app)
       .post('/users')
-      .send({
-        email: 'johndoe@example.com',
-        password: 'password123',
-      })
+      .send({ email, password })
       .expect(201)
-      .end((err, res) => {
-        if (err) done(err);
-        userId = res.body.user.id;
-        setTimeout(() => {
-          assert(res.body.user.id === userId);
-        }, 3000);
-        setTimeout(() => {
-          done();
-        }, 5000); // wait for 5 seconds before making the assertion
-      });
-  }).timeout(10000); // set the timeout limit to 10 seconds
+      .timeout(10000);
+
+    userId = user.id;
+    // set the timeout limit to 10 seconds
+  });
 
   // sign in the user and get an access token
-  it('should sign in the user and get an access token', async function () {
+  before('Sign in the user and get an access token', async function () {
     console.log('signing in now...');
 
     try {
@@ -71,9 +67,8 @@ describe('POST /users', () => {
 
       console.log('signed in successfully!');
 
-      const accessToken = session.access_token;
-      console.log('### access_token: ' + accessToken);
-      console.log('### session: ' + session);
+      accessToken = session.access_token;
+      // console.log('### session: ' + session);
     } catch (err) {
       console.error(err);
       throw err;
@@ -81,8 +76,10 @@ describe('POST /users', () => {
   });
 
   it('should update an existing user', (done) => {
+    console.log('### access_token: ' + accessToken);
     supertest(app)
       .patch(`/users/${userId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send({
         email: 'updatedemail@example.com',
       })
@@ -95,7 +92,7 @@ describe('POST /users', () => {
       });
   });
 });
-
+  
 // describe('DELETE /users/:id', () => {
 //   it('should delete a user by ID', (done) => {
 //     supertest(app)

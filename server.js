@@ -1,5 +1,7 @@
 const express = require("express");
-const cors = require("cors");
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+const cors = require('cors');
 const usersRoute = require('./routes/usersRoute');
 const projectsRoute = require('./routes/projectsRoute');
 const buildingsRoute = require('./routes/buildingsRoute');
@@ -9,7 +11,10 @@ const areasRoute = require('./routes/areasRoute');
 const zonesRoute = require('./routes/zonesRoute');
 const knxEntitiesRoute = require('./routes/knxEntitiesRoute');
 const mqttEntitiesRoute = require('./routes/mqttEntitiesRoute');
-
+const { createClient } = require('@supabase/supabase-js');
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const app = express();
 
 app.use(cors());
@@ -24,6 +29,20 @@ app.use('/areas', areasRoute);
 app.use('/zones', zonesRoute);
 app.use('/knxEntities', knxEntitiesRoute);
 app.use('/mqttEntities', mqttEntitiesRoute);
+
+// Middleware to handle Supabase authentication
+app.use(async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    try {
+      const { data: user } = await supabase.auth.api.getUser(authHeader);
+      req.user = user;
+    } catch (error) {
+      console.log('Failed to authenticate user:', error);
+    }
+  }
+  next();
+});
 
 const port = process.env.PORT || 3005;
 app.listen(port, () => {
