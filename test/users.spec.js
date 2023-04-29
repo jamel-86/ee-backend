@@ -81,15 +81,19 @@ describe('User tests', () => {
       .patch(`/users/${userId}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
-        email: 'updatedemail@example.com',
+        data: { first_name: 'John', last_name: 'Doe' },
       })
       .expect(200)
       .end((err, res) => {
         if (err) done(err);
         console.log(res.body);
-        assert(res.body.user.email === 'updatedemail@example.com');
+        assert.deepStrictEqual(res.body.user.data, {
+          first_name: 'John',
+          last_name: 'Doe',
+        });
         done();
-      });
+      })
+      .timeout(10000);
   });
 });
   

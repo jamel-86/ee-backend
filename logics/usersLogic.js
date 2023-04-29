@@ -94,15 +94,18 @@ async function signOut() {
 }
 
 const updateUser = async (req, res) => {
-  const { userId } = req.params;
-  const { email } = req.body;
+  const { data } = req.body;
   const { user } = req;
 
   try {
-    const { data, error } = await supabase.auth.api.updateUser(
-      user.access_token, // Pass the access_token here
-      { email }
-    );
+    if (!user) {
+      throw new Error('User not signed in');
+    }
+
+    const { data: updatedUser, error } = await supabase.auth.updateUser({
+      id: user.id,
+      data,
+    });
 
     if (error) {
       throw error;
@@ -110,7 +113,7 @@ const updateUser = async (req, res) => {
 
     res.status(200).json({
       status: 'success',
-      user: data,
+      user: updatedUser,
     });
   } catch (error) {
     console.error('Failed to update user', error);
@@ -121,6 +124,7 @@ const updateUser = async (req, res) => {
     });
   }
 };
+
 
 module.exports = {
   createNewUser,

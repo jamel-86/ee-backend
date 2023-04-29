@@ -35,7 +35,7 @@ app.use(async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
     try {
-      const { data: user } = await supabase.auth.api.getUser(authHeader);
+      const { data: user } = await supabase.auth.getUser(authHeader);
       req.user = user;
     } catch (error) {
       console.log('Failed to authenticate user:', error);
@@ -43,6 +43,25 @@ app.use(async (req, res, next) => {
   }
   next();
 });
+
+const authMiddleware = async (req, res, next) => {
+  const authHeader = req.header('Authorization');
+  if (!authHeader) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  const { user, error } = await supabase.auth.getUser(token);
+
+  if (error) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  req.user = user;
+  next();
+};
+
+app.use('/users', authMiddleware, usersRoute);
 
 const port = process.env.PORT || 3005;
 app.listen(port, () => {
