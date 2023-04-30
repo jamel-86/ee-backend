@@ -105,6 +105,18 @@ authRouter.get("/isAuthenticated", async (req, res) => {
     }
   });
 
+  // update a users metadata in the data object as json on this  supabase.auth.updateUser()
+  authRouter.put("/updateUser", async (req, res) => {
+    const { data, error } = await supabase.auth.updateUser({
+      data: req.body.data,
+    });
+    if (error) {
+      console.error("Failed to update user", error);
+      res.status(500).json({ error: "Failed to update user" });
+    }
+    res.json({ message: "User updated successfully!" });
+  });
+
   // route to delete user
   authRouter.delete("/deleteUser", async (req, res) => {
     const id = req.body.userId;
