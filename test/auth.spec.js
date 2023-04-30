@@ -12,6 +12,12 @@ const signUp = async (email, password) => {
   return response;
 };
 
+// get the active session and retunr the user id
+const getActiveSession = async () => {
+  const response = await request(app).get("/api/auth/session");
+  return response;
+};
+
 // signIn a user and return the response
 const signIn = async (email, password) => {
   const response = await request(app)
@@ -28,6 +34,7 @@ const signOut = async () => {
 
 // Test for auth routes
 describe("Test for auth routes", () => {
+  let userId;
   // Test for sign up
   describe("POST /api/auth/signup", () => {
     it("should sign up a new user", async () => {
@@ -46,6 +53,7 @@ describe("Test for auth routes", () => {
         .set("Authorization", `Bearer ${newToken}`);
       expect(response.status).to.equal(200);
       expect(response.body.message).to.equal("User is authenticated!");
+      userId = response.body.userId;
     });
 
     it("should return 401 if user is not authenticated", async () => {
@@ -60,6 +68,20 @@ describe("Test for auth routes", () => {
       const response = await signOut();
       expect(response.status).to.equal(200);
       expect(response.body.message).to.equal("User signed out successfully!");
+    });
+  });
+  // Test for deleting a user /api/auth/deleteUser by first retrieving the user id
+  describe("DELETE /api/auth/deleteUser", () => {
+    it("should get the user id and delete the user", async () => {
+      const accessToken = await signIn("johnDoe@mail.test", "123456");
+      const newToken = accessToken.body.accessToken;
+      console.log("### userId: ", userId);
+      const response = await request(app)
+        .delete("/api/auth/deleteUser")
+        .set("Authorization", `Bearer ${newToken}`)
+        .send({ userId });
+      expect(response.status).to.equal(200);
+      expect(response.body.message).to.equal("User deleted successfully!");
     });
   });
 });

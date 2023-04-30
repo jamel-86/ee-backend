@@ -63,11 +63,13 @@ authRouter.post("/signOut", async (req, res) => {
 
 // Router to check if user is authenticated with supabase
 authRouter.get("/isAuthenticated", async (req, res) => {
+  let userId;
   try {
     const token = req.headers.authorization.split(" ")[1];
     try {
       const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
       console.log(decodedToken);
+      userId = decodedToken.sub;
       // Check if the token is expired
       if (decodedToken.exp < Date.now()) {
         console.log("Token is expired");
@@ -77,7 +79,7 @@ authRouter.get("/isAuthenticated", async (req, res) => {
       }
       // Check if the user is authenticated
       if (decodedToken.sub) {
-        console.log("User is authenticated");
+        console.log("User is authenticated", userId);
       } else {
         console.log("User is not authenticated");
       }
@@ -85,11 +87,36 @@ authRouter.get("/isAuthenticated", async (req, res) => {
       console.log(error.message);
       throw new Error("Invalid token");
     }
-    res.json({ message: "User is authenticated!" });
+    res.json({ message: "User is authenticated!", userId });
   } catch (error) {
     console.error("User is not authenticated", error);
     res.status(401).json({ error: "User is not authenticated" });
   }
+
+  // route to retrieve active session
+  authRouter.get("/session", async (req, res) => {
+    try {
+      const { data: session, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      res.json({ session });
+    } catch (error) {
+      console.error("Failed to get session", error);
+      res.status(500).json({ error: "Failed to get session" });
+    }
+  });
+
+  // route to delete user
+  authRouter.delete("/deleteUser", async (req, res) => {
+    const id = req.body.userId;
+    try {
+      const { error } = await supabase.auth.admin.deleteUser(id);
+      if (error) throw error;
+      res.json({ message: "User deleted successfully!" });
+    } catch (error) {
+      console.error("Failed to delete user", error);
+      res.status(500).json({ error: "Failed to delete user" });
+    }
+  });
 });
 
 module.exports = authRouter;
