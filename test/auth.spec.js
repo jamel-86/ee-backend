@@ -32,6 +32,14 @@ const signOut = async () => {
   return response;
 };
 
+// update a user and return the response
+const updateUser = async (userId, email, password) => {
+  const response = await request(app)
+    .put("/api/auth/updateUser")
+    .send({ data });
+  return response;
+};
+
 // Test for auth routes
 describe("Test for auth routes", () => {
   let userId;
@@ -62,6 +70,26 @@ describe("Test for auth routes", () => {
       expect(response.body.error).to.equal("User is not authenticated");
     });
   });
+
+  // Test for updating a user, first sign in a user, then get the Auth session
+  describe("PUT /api/auth/updateUser", () => {
+    it("should update a user", async () => {
+      const accessToken = await signIn("johnDoe@mail.test", "123456");
+      const newToken = accessToken.body.accessToken;
+      const auth = await request(app)
+        .get("/api/auth/isAuthenticated")
+        .set("Authorization", `Bearer ${newToken}`);
+      expect(auth.status).to.equal(200);
+      expect(auth.body.message).to.equal("User is authenticated!");
+      const response = await request(app)
+        .put("/api/auth/updateUser")
+        .set("Authorization", `Bearer ${newToken}`)
+        .send({ data: { first_name: "John", last_name: "Doe" } });
+      expect(response.status).to.equal(200);
+      expect(response.body.message).to.equal("User updated successfully!");
+    });
+  });
+
   // Test for sign out
   describe("POST /api/auth/signout", () => {
     it("should sign out a user", async () => {
