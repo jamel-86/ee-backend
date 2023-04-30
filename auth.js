@@ -11,7 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 authRouter.post("/signup", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });

@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const authRouter = require("./auth");
 const app = express();
-const port = process.env.PORT || 3005;
+const port = process.env.PORT || 3004;
 
 app.use(bodyParser.json());
 app.use("/api/auth", authRouter);
